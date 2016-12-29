@@ -1,6 +1,12 @@
 (function () {
-  function SongPlayer() {
+  function SongPlayer(Fixtures) {
     var SongPlayer = {};
+
+    /**
+    * @desc Stores current album information from Fixtures.js
+    * @type {Object} album
+    */
+    var currentAlbum = Fixtures.getAlbum();
 
     /** 
     * @desc Buzz object audio file
@@ -10,7 +16,7 @@
 
     /**
     * @function setSong
-    * @ desc Stops currently playing song and loads new audio file as currentBuzzObject
+    * @desc Stops currently playing song and loads new audio file as currentBuzzObject
     * @param {Object} song
     */
     var setSong = function(song) {
@@ -35,25 +41,54 @@
     };
 
     /**
+    * @function getSongIndex
+    * @desc Gets the function of the currently playing song
+    * @param {Object} song
+    */
+    var getSongIndex = function(song) {
+      return currentAlbum.songs.indexOf(song);
+    };
+
+    /**
     * @desc Active song object from list of songs
     * @type {Object}
     */
     SongPlayer.currentSong = null;
 
     SongPlayer.play = function(song) {
+      song = song || SongPlayer.currentSong;
       if (SongPlayer.currentSong !== song) {
         setSong(song);
-        playSong();
+        playSong(song);
       } else if (SongPlayer.currentSong === song) {
         if (currentBuzzObject.isPaused()) {
-          currentBuzzObject.play();
+          playSong(song);
         }
       }
     };
 
     SongPlayer.pause = function(song) {
+      song = song || SongPlayer.currentSong;
       currentBuzzObject.pause();
       song.playing = false;
+    };
+
+    /**
+    * @desc Function to get the current song index and decrease by 1
+    * @type {Object}
+    */
+    SongPlayer.previous = function() {
+      var currentSongIndex = getSongIndex(SongPlayer.currentSong);
+      currentSongIndex--;
+
+      if (currentSongIndex < 0) {
+        currentBuzzObject.stop();
+        SongPlayer.currentSong.playing = null;
+      } else {
+        var song = currentAlbum.songs[currentSongIndex];
+        setSong(song);
+        playSong(song);
+      }
     };
 
     return SongPlayer;
